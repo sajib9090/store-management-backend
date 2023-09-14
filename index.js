@@ -159,7 +159,6 @@ async function run() {
         res.status(500).send("Error fetching products from the database");
       }
     });
-
     //patch for increase product stock
     app.patch("/api/increase/products/stock", async (req, res) => {
       const updatedProducts = req.body; // Array of products to update
@@ -292,7 +291,6 @@ async function run() {
         res.status(500).send("Error decreasing product stock");
       }
     });
-
     app.post("/api/add/product", async (req, res) => {
       const product = req.body;
       product.createdDate = new Date();
@@ -313,6 +311,24 @@ async function run() {
         res.send(result);
       } catch (error) {
         res.status(500).send("Error inserting data into the database");
+      }
+    });
+    //delete
+    app.delete("/api/delete/product/:id", async (req, res) => {
+      const productId = req.params.id;
+
+      try {
+        const result = await productsCollection.deleteOne({
+          _id: new ObjectId(productId),
+        });
+
+        if (result.deletedCount === 1) {
+          res.json({ message: "Product deleted successfully" });
+        } else {
+          res.status(404).json({ message: "Product not found" });
+        }
+      } catch (error) {
+        res.status(500).send("Error deleting product from the database");
       }
     });
 
