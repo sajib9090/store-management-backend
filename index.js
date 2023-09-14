@@ -427,7 +427,7 @@ async function run() {
             .send("Invalid data format. Expected an array.");
         }
 
-        const insertionTime = new Date(); // Add a timestamp for the entire array
+        const insertionTime = new Date();
 
         // Create a new document with the invoices array and a createdTime field
         const newDocument = {
