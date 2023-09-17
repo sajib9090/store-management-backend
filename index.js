@@ -400,6 +400,29 @@ async function run() {
     });
 
     //api for sell invoice
+    app.get("/api/get/soldInvoices/byDate/:date", async (req, res) => {
+      try {
+        const dateParam = req.params.date;
+        const startDate = new Date(dateParam);
+        const endDate = new Date(dateParam);
+        endDate.setDate(endDate.getDate() + 1); // Set the end date to the next day
+
+        const filteredSoldInvoices = await soldInvoiceCollection
+          .find({
+            createdTime: {
+              $gte: startDate,
+              $lt: endDate,
+            },
+          })
+          .toArray();
+
+        res.status(200).json(filteredSoldInvoices);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Error retrieving data");
+      }
+    });
+
     app.get("/api/get/soldInvoices", async (req, res) => {
       try {
         // Retrieve all documents from the soldInvoiceCollection
