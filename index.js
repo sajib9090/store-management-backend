@@ -43,6 +43,38 @@ async function run() {
     const soldInvoiceCollection = client
       .db("StoreManagement")
       .collection("soldInvoices");
+    const usersCollection = client.db("StoreManagement").collection("users");
+
+    //user api
+    app.get("/api/get/users", async (req, res) => {
+      try {
+        const users = await usersCollection.find({}).toArray();
+        res.json(users);
+      } catch (error) {
+        res.status(500).send("Error fetching user data from the database");
+      }
+    });
+
+    app.post("/api/add/user", async (req, res) => {
+      const userData = req.body;
+
+      try {
+        // Check if a user with the same email already exists
+        const existingUser = await usersCollection.findOne({
+          email: userData.email,
+        });
+
+        if (existingUser) {
+          return res.status(400).send("User with this email already exists");
+        }
+
+        // Insert the new user document
+        const result = await usersCollection.insertOne(userData);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send("Error inserting user data into the database");
+      }
+    });
 
     // generics api
     app.get("/api/get/generics", async (req, res) => {
@@ -159,6 +191,29 @@ async function run() {
         res.status(500).send("Error fetching products from the database");
       }
     });
+    //update
+    app.patch("/api/update/product/:id", async (req, res) => {
+      const productId = req.params.id;
+      const { product_purchase_price, stock, price, last_edited_date } =
+        req.body;
+
+      try {
+        const result = await productsCollection.updateOne(
+          { _id: new ObjectId(productId) },
+          { $set: { product_purchase_price, stock, price, last_edited_date } }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res.status(404).json({ error: "Product not found" });
+        }
+
+        res.json({ message: "Product updated successfully" });
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ error: "Error updating product" });
+      }
+    });
+
     //patch for increase product stock
     app.patch("/api/increase/products/stock", async (req, res) => {
       const updatedProducts = req.body; // Array of products to update
