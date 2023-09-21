@@ -388,6 +388,28 @@ async function run() {
     });
 
     //api for purchase invoice
+    app.get("/api/get/purchaseInvoices/byDate/:date", async (req, res) => {
+      try {
+        const dateParam = req.params.date;
+        const startDate = new Date(dateParam);
+        const endDate = new Date(dateParam);
+        endDate.setDate(endDate.getDate() + 1); // Set the end date to the next day
+
+        const filteredPurchaseInvoices = await purchaseInvoiceCollection
+          .find({
+            createdTime: {
+              $gte: startDate,
+              $lt: endDate,
+            },
+          })
+          .toArray();
+
+        res.status(200).json(filteredPurchaseInvoices);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Error retrieving data");
+      }
+    });
     app.get("/api/get/purchaseInvoices", async (req, res) => {
       try {
         const purchaseInvoices = await purchaseInvoiceCollection
