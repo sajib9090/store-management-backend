@@ -111,6 +111,23 @@ async function run() {
         res.status(500).send("Error inserting data into the database");
       }
     });
+    app.delete("/api/delete/generic/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const objectId = new ObjectId(id);
+
+        const result = await genericCollection.deleteOne({ _id: objectId });
+
+        if (result.deletedCount === 1) {
+          res.status(200).json({ message: "Generic deleted successfully" });
+        } else {
+          res.status(404).json({ message: "Generic not found" });
+        }
+      } catch (error) {
+        console.error("Error deleting generic:", error);
+        res.status(500).json({ message: "Error deleting generic" });
+      }
+    });
     // company api
     app.get("/api/get/companies", async (req, res) => {
       try {
@@ -194,13 +211,26 @@ async function run() {
     //update
     app.patch("/api/update/product/:id", async (req, res) => {
       const productId = req.params.id;
-      const { product_purchase_price, stock, price, last_edited_date } =
-        req.body;
+      const {
+        product_purchase_price,
+        stock,
+        price,
+        last_edited_date,
+        last_editor_email,
+      } = req.body;
 
       try {
         const result = await productsCollection.updateOne(
           { _id: new ObjectId(productId) },
-          { $set: { product_purchase_price, stock, price, last_edited_date } }
+          {
+            $set: {
+              product_purchase_price,
+              stock,
+              price,
+              last_edited_date,
+              last_editor_email,
+            },
+          }
         );
 
         if (result.modifiedCount === 0) {
